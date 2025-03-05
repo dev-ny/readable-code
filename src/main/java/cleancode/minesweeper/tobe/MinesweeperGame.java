@@ -44,8 +44,11 @@ public class MinesweeperGame {
                 String userActionInput = getUserActionInputFromUser();
 
                 actOnCell(cellInput, userActionInput);
-            } catch (IllegalArgumentException e) {
+            } catch (AppException e) { // 의도적인 Exception
                 System.out.println(e.getMessage());
+            } catch (Exception e) { // 예상하지 못한 Exception
+                System.out.println("프로그램에 문제가 생겼습니다.");
+//                e.printStackTrace(); // 실무에서는 Antipattern 실무에서는 log 시스템에서 log 를 남기고 별도의 조치를 취함
             }
         }
     }
@@ -155,7 +158,7 @@ public class MinesweeperGame {
     private static int convertRowFrom(char cellInputRow) {
         int rowIndex = Character.getNumericValue(cellInputRow) - 1;
         if (rowIndex > BOARD_ROW_SIZE) {
-            throw new IllegalArgumentException("잘못된 입력입니다.");
+            throw new AppException("잘못된 입력입니다.");
         }
         return rowIndex;
     }
@@ -185,7 +188,7 @@ public class MinesweeperGame {
                 return 9;
             default:
 //                return -1;
-                throw new IllegalArgumentException("잘못된 입력입니다.");
+                throw new AppException("잘못된 입력입니다.");
         }
 //        return selectedColIndex;
     }
