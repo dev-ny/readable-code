@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
-public class MinesweeperGame {
-
+// 모든 지뢰찾기 게임 로직을 여기에 둘 것임
+public class Minesweeper {
     // 중요한 문자열, 숫자야. 유지보수할때 잘 봐야해! 할 수 있는 것 = 매직넘버, 매직스트링
     public static final int BOARD_ROW_SIZE = 8;
     public static final int BOARD_COL_SIZE = 10;
@@ -14,9 +14,9 @@ public class MinesweeperGame {
     private static final Cell[][] BOARD = new Cell[BOARD_ROW_SIZE][BOARD_COL_SIZE];
     public static final int LAND_MINES_COUNT = 10;
 
-    private static int gameStatus = 0; // 0: 게임 중, 1: 승리, -1: 패배
+    private int gameStatus = 0; // 0: 게임 중, 1: 승리, -1: 패배
 
-    public static void main(String[] args) {
+    public void run() {
         showGameStartCommand();
         initializeGame();
 
@@ -47,7 +47,7 @@ public class MinesweeperGame {
         }
     }
 
-    private static void actOnCell(String cellInput, String userActionInput) {
+    private void actOnCell(String cellInput, String userActionInput) {
         int selectedColIndex = getSelectedColIndex(cellInput);
         int selectedRowIndex = getSelectedRowIndex(cellInput);
 
@@ -73,63 +73,63 @@ public class MinesweeperGame {
         System.out.println("잘못된 번호를 선택하셨습니다.");
     }
 
-    private static void changeGameStatusToLose() {
+    private void changeGameStatusToLose() {
         gameStatus = -1;
     }
 
-    private static boolean isLandMineCell(int selectedRowIndex, int selectedColIndex) {
+    private boolean isLandMineCell(int selectedRowIndex, int selectedColIndex) {
         return BOARD[selectedRowIndex][selectedColIndex].isLandMine();
     }
 
-    private static boolean doesUserChooseToOpenCell(String userActionInput) {
+    private boolean doesUserChooseToOpenCell(String userActionInput) {
         return userActionInput.equals("1");
     }
 
-    private static boolean doesUserChooseToPlantFlag(String userActionInput) {
+    private boolean doesUserChooseToPlantFlag(String userActionInput) {
         return userActionInput.equals("2");
     }
 
-    private static int getSelectedRowIndex(String cellInput) {
+    private int getSelectedRowIndex(String cellInput) {
         char cellInputRow = cellInput.charAt(1);
         return convertRowFrom(cellInputRow);
     }
 
-    private static int getSelectedColIndex(String cellInput) {
+    private int getSelectedColIndex(String cellInput) {
         char cellInputCol = cellInput.charAt(0);
         return convertColFrom(cellInputCol);
     }
 
-    private static String getUserActionInputFromUser() {
+    private String getUserActionInputFromUser() {
         System.out.println("선택한 셀에 대한 행위를 선택하세요. (1: 오픈, 2: 깃발 꽂기)");
         return SCANNER.nextLine();
     }
 
-    private static String getCellInputFromUser() {
+    private String getCellInputFromUser() {
         System.out.println("선택할 좌표를 입력하세요. (예: a1)");
 
         return SCANNER.nextLine();
     }
 
-    private static boolean doesUserLoseTheGame() {
+    private boolean doesUserLoseTheGame() {
         return gameStatus == -1;
     }
 
-    private static boolean doesUserWinTheGame() {
+    private boolean doesUserWinTheGame() {
         return gameStatus == 1;
     }
 
-    private static void checkIfGameIsOver() {
+    private void checkIfGameIsOver() {
         boolean isAllCellChecked = isAllCellChecked();
         if (isAllCellChecked) { // 게임 이긴 것
             changeGameStatusToWin();
         }
     }
 
-    private static void changeGameStatusToWin() {
+    private void changeGameStatusToWin() {
         gameStatus = 1;
     }
 
-//    private static boolean isAllCellOpened() {
+//    private boolean isAllCellOpened() {
 //        boolean isAllOpened = true;
 //        for (int row = 0; row < BOARD_ROW_SIZE; row++) {
 //            for (int col = 0; col < BOARD_COL_SIZE; col++) {
@@ -141,7 +141,7 @@ public class MinesweeperGame {
 //        return isAllOpened;
 //    }
 
-    private static boolean isAllCellChecked() {
+    private boolean isAllCellChecked() {
         return Arrays.stream(BOARD)// BOARD 라는 이중 string 배열에 stream 을 걸면 String[] 형태의 Stream 이 나옴 Stream<String[]>
                 // 그냥 Map 을 하면 Stream<Stream<String>> 이 나오는데 flatMap 을 하면서 평탄화를 통해 이중배열을 배열로, 즉, Stream<String> 으로 만들어주는 것
                 .flatMap(stringArr -> Arrays.stream(stringArr)) // flatMap 을 하면 Stream<String> 이 생기는데 이 stringArray 를 하나씩 돌면서 다시 Stream<String[]> 만들거다
@@ -149,7 +149,7 @@ public class MinesweeperGame {
                 .allMatch(Cell::isChecked);
     }
 
-    private static int convertRowFrom(char cellInputRow) {
+    private int convertRowFrom(char cellInputRow) {
         int rowIndex = Character.getNumericValue(cellInputRow) - 1;
         if (rowIndex > BOARD_ROW_SIZE) {
             throw new AppException("잘못된 입력입니다.");
@@ -157,7 +157,7 @@ public class MinesweeperGame {
         return rowIndex;
     }
 
-    private static int convertColFrom(char cellInputCol) {
+    private int convertColFrom(char cellInputCol) {
 //        int selectedColIndex;
         switch (cellInputCol) {
             case 'a':
@@ -187,7 +187,7 @@ public class MinesweeperGame {
 //        return selectedColIndex;
     }
 
-    private static void showBoard() {
+    private void showBoard() {
         System.out.println("   a b c d e f g h i j");
         for (int row = 0; row < BOARD_ROW_SIZE; row++) {
             System.out.printf("%d  ", row + 1);
@@ -198,7 +198,7 @@ public class MinesweeperGame {
         }
     }
 
-    private static void initializeGame() {
+    private void initializeGame() {
         for (int row = 0; row < BOARD_ROW_SIZE; row++) {
             for (int col = 0; col < BOARD_COL_SIZE; col++) {
                 BOARD[row][col] = Cell.create();
@@ -224,7 +224,7 @@ public class MinesweeperGame {
         }
     }
 
-    private static int countNearbyLandMines(int row, int col, int count) {
+    private int countNearbyLandMines(int row, int col, int count) {
         if (row - 1 >= 0 && col - 1 >= 0 && isLandMineCell(row - 1, col - 1)) {
             count++;
         }
@@ -252,13 +252,13 @@ public class MinesweeperGame {
         return count;
     }
 
-    private static void showGameStartCommand() {
+    private void showGameStartCommand() {
         System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         System.out.println("지뢰찾기 게임 시작!");
         System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     }
 
-    private static void open(int row, int col) {
+    private void open(int row, int col) {
         if (row < 0 || row >= BOARD_ROW_SIZE || col < 0 || col >= BOARD_COL_SIZE) {
             return;
         }
@@ -290,5 +290,4 @@ public class MinesweeperGame {
         open(row + 1, col);
         open(row + 1, col + 1);
     }
-
 }
