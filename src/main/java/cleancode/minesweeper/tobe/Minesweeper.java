@@ -6,8 +6,9 @@ import cleancode.minesweeper.tobe.io.ConsoleOutputHandler;
 // 모든 지뢰찾기 게임 로직을 여기에 둘 것임
 public class Minesweeper {
     // 중요한 문자열, 숫자야. 유지보수할때 잘 봐야해! 할 수 있는 것 = 매직넘버, 매직스트링
-    public static final int BOARD_ROW_SIZE = 8;
-    public static final int BOARD_COL_SIZE = 10;
+    private static final int BOARD_ROW_SIZE = 8;
+    private static final int BOARD_COL_SIZE = 10;
+    private static final char BASE_CHAR_FOR_COL = 'a';
     // 상수 컨벤션 = 대문자와 언더스코어로 이루어져 있게 해야함
 
     private final GameBoard gameBoard = new GameBoard(BOARD_ROW_SIZE, BOARD_COL_SIZE);
@@ -87,7 +88,7 @@ public class Minesweeper {
     }
 
     private int getSelectedRowIndex(String cellInput) {
-        char cellInputRow = cellInput.charAt(1);
+        String cellInputRow = cellInput.substring(1);
         return convertRowFrom(cellInputRow);
     }
 
@@ -137,41 +138,19 @@ public class Minesweeper {
 //        return isAllOpened;
 //    }
 
-    private int convertRowFrom(char cellInputRow) {
-        int rowIndex = Character.getNumericValue(cellInputRow) - 1;
+    private int convertRowFrom(String cellInputRow) {
+        int rowIndex = Integer.parseInt(cellInputRow) - 1;
         if (rowIndex > BOARD_ROW_SIZE) {
             throw new GameException("잘못된 입력입니다.");
         }
         return rowIndex;
     }
 
-    private int convertColFrom(char cellInputCol) {
-//        int selectedColIndex;
-        switch (cellInputCol) {
-            case 'a':
-                return 0;
-            case 'b':
-                return 1;
-            case 'c':
-                return 2;
-            case 'd':
-                return 3;
-            case 'e':
-                return 4;
-            case 'f':
-                return 5;
-            case 'g':
-                return 6;
-            case 'h':
-                return 7;
-            case 'i':
-                return 8;
-            case 'j':
-                return 9;
-            default:
-//                return -1;
-                throw new GameException("잘못된 입력입니다.");
+    private int convertColFrom(char cellInputCol) { // 'a' // 알파벳이 j 까지만 대응되어 있음
+        int colIndex = cellInputCol - BASE_CHAR_FOR_COL; // a가 들어가면 0, b가 들어가면 1
+        if (colIndex < 0 ) { // a = 97 인데 cellInput 이 96 이면 알파벳이 아니기 때문 // 현재 대문자는 생각하지 않음.
+            throw new GameException("잘못된 입력입니다.");
         }
-//        return selectedColIndex;
+        return colIndex;
     }
 }
