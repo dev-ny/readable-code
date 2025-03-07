@@ -4,6 +4,9 @@ import cleancode.minesweeper.tobe.GameBoard;
 import cleancode.minesweeper.tobe.GameException;
 import cleancode.minesweeper.tobe.Cell;
 
+import java.util.List;
+import java.util.stream.IntStream;
+
 public class ConsoleOutputHandler {
     public void showGameStartCommand() {
         System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
@@ -12,15 +15,27 @@ public class ConsoleOutputHandler {
     }
 
     public void showBoard(GameBoard board) {
-        System.out.println("   a b c d e f g h i j");
+        String alphabets = generateColAlphabets(board);
+
+        System.out.println("    " + alphabets);
+
         for (int row = 0; row < board.getRowSize(); row++) {
-            System.out.printf("%d  ", row + 1);
+            System.out.printf("%2d  ", row + 1); // 2자리 수 이상일때 col 정렬 맞출 수 있도록 함
             for (int col = 0; col < board.getColSize(); col++) {
                 System.out.print(board.getSign(row, col) + " "); // 여기는 getter 를 안쓰는게 이상해 // 내가 여기에 보드를 그릴테니 cell 내용을 줘!
             }
             System.out.println();
         }
         System.out.println();
+    }
+
+    private static String generateColAlphabets(GameBoard board) {
+        List<String> alphabets = IntStream.range(0, board.getColSize())  // 0 부터 colSize 까지 range 만듦
+                .mapToObj(index -> (char)('a' + index)) // 'a' + 0 = 'a'
+                .map(c -> c.toString())
+                .toList(); // 알파벳 묶음이 될 것임
+        String joiningAlphabets = String.join(" ", alphabets); // 알파벳들을 연결해줘
+        return joiningAlphabets;
     }
 
     public void printGameWinningComment() {
