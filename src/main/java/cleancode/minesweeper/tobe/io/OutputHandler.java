@@ -3,24 +3,21 @@ package cleancode.minesweeper.tobe.io;
 import cleancode.minesweeper.tobe.GameBoard;
 import cleancode.minesweeper.tobe.GameException;
 
-import java.util.List;
-import java.util.stream.IntStream;
-
 public interface OutputHandler {
 
     void showGameStartCommand();
 
     void showBoard(GameBoard board);
 
-    void printGameWinningComment();
+    void showGameWinningComment();
 
-    void printGameLosingComment();
+    void showGameLosingComment();
 
-    void printCommentForSelectingCell();
+    void showCommentForSelectingCell();
 
-    void printCommentFOrUserAction();
+    void showCommentFOrUserAction();
 
-    void printExceptionMessage(GameException e);
+    void showExceptionMessage(GameException e);
 
-    void printSimpleMessage(String message);
+    void showSimpleMessage(String message);
 }

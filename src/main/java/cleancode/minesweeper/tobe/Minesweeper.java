@@ -3,8 +3,6 @@ package cleancode.minesweeper.tobe;
 import cleancode.minesweeper.tobe.game.GameInitializable;
 import cleancode.minesweeper.tobe.game.GameRunnable;
 import cleancode.minesweeper.tobe.gamelevel.GameLevel;
-import cleancode.minesweeper.tobe.io.ConsoleInputHandler;
-import cleancode.minesweeper.tobe.io.ConsoleOutputHandler;
 import cleancode.minesweeper.tobe.io.InputHandler;
 import cleancode.minesweeper.tobe.io.OutputHandler;
 
@@ -44,11 +42,11 @@ public class Minesweeper implements GameInitializable, GameRunnable {
                 outputHandler.showBoard(gameBoard);
 
                 if (doesUserWinTheGame()) {
-                    outputHandler.printGameWinningComment();
+                    outputHandler.showGameWinningComment();
                     break;
                 }
                 if (doesUserLoseTheGame()) {
-                    outputHandler.printGameLosingComment();
+                    outputHandler.showGameLosingComment();
                     break;
                 }
 
@@ -57,10 +55,10 @@ public class Minesweeper implements GameInitializable, GameRunnable {
 
                 actOnCell(cellInput, userActionInput);
             } catch (GameException e) { // 의도적인 Exception
-                outputHandler.printExceptionMessage(e);
+                outputHandler.showExceptionMessage(e);
 
             } catch (Exception e) { // 예상하지 못한 Exception
-                outputHandler.printSimpleMessage("프로그램에 문제가 생겼습니다.");
+                outputHandler.showSimpleMessage("프로그램에 문제가 생겼습니다.");
 //                e.printStackTrace(); // 실무에서는 Antipattern 실무에서는 log 시스템에서 log 를 남기고 별도의 조치를 취함
             }
         }
@@ -105,12 +103,12 @@ public class Minesweeper implements GameInitializable, GameRunnable {
     }
 
     private String getUserActionInputFromUser() {
-        outputHandler.printCommentFOrUserAction();
+        outputHandler.showCommentFOrUserAction();
         return inputHandler.getUserInput();
     }
 
     private String getCellInputFromUser() {
-        outputHandler.printCommentForSelectingCell();
+        outputHandler.showCommentForSelectingCell();
 
         return inputHandler.getUserInput();
     }
