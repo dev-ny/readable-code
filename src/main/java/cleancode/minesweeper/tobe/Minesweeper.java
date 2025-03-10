@@ -5,7 +5,7 @@ import cleancode.minesweeper.tobe.io.ConsoleInputHandler;
 import cleancode.minesweeper.tobe.io.ConsoleOutputHandler;
 
 // 모든 지뢰찾기 게임 로직을 여기에 둘 것임
-public class Minesweeper {
+public class Minesweeper implements Game {
     // 중요한 문자열, 숫자야. 유지보수할때 잘 봐야해! 할 수 있는 것 = 매직넘버, 매직스트링
 //    private static final int BOARD_ROW_SIZE = 8;
 //    private static final int BOARD_COL_SIZE = 10;
@@ -24,9 +24,14 @@ public class Minesweeper {
         gameBoard = new GameBoard(gameLevel);
     }
 
+    @Override
+    public void initialize() {
+        gameBoard.initializeGame();
+    }
+
+    @Override
     public void run() {
         consoleOutputHandler.showGameStartCommand();
-        gameBoard.initializeGame();
 
         while (true) {
             try {
