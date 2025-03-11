@@ -1,34 +1,31 @@
 package cleancode.minesweeper.tobe;
 
-import cleancode.minesweeper.tobe.cell.Cell;
-import cleancode.minesweeper.tobe.cell.EmptyCell;
-import cleancode.minesweeper.tobe.cell.LandMineCell;
-import cleancode.minesweeper.tobe.cell.NumberCell;
+import cleancode.minesweeper.tobe.cell.*;
 import cleancode.minesweeper.tobe.gamelevel.GameLevel;
 
 import java.util.Arrays;
 import java.util.Random;
 
 public class GameBoard {
-    private final Cell[][] board;
+    private final Cell2[][] board;
     private final int landMineCount;
 
     public GameBoard(GameLevel gameLevel) {
         int rowSize = gameLevel.getRowSize();
         int colSize = gameLevel.getColSize();
 
-        board = new Cell[rowSize][colSize];
+        board = new Cell2[rowSize][colSize];
 
         landMineCount = gameLevel.getLandMineCount();
     }
 
     public void flag(int rowIndex, int colIndex) {
-        Cell cell = findCell(rowIndex, colIndex);
+        Cell2 cell = findCell(rowIndex, colIndex);
         cell.flag();
     }
 
     public boolean isLandMineCell(int selectedRowIndex, int selectedColIndex) {
-        Cell cell = findCell(selectedRowIndex, selectedColIndex);
+        Cell2 cell = findCell(selectedRowIndex, selectedColIndex);
         return cell.isLandMine();
     }
 
@@ -105,15 +102,15 @@ public class GameBoard {
                 // 그냥 Map 을 하면 Stream<Stream<String>> 이 나오는데 flatMap 을 하면서 평탄화를 통해 이중배열을 배열로, 즉, Stream<String> 으로 만들어주는 것
                 .flatMap(stringArr -> Arrays.stream(stringArr)) // flatMap 을 하면 Stream<String> 이 생기는데 이 stringArray 를 하나씩 돌면서 다시 Stream<String[]> 만들거다
                 // 여기까지가 Stream<String>
-                .allMatch(Cell::isChecked);
+                .allMatch(Cell2::isChecked);
     }
 
     public String getSign(int rowIndex, int colIndex) {
-        Cell cell = findCell(rowIndex, colIndex);
+        Cell2 cell = findCell(rowIndex, colIndex);
         return cell.getSign();
     }
 
-    private Cell findCell(int rowIndex, int colIndex) {
+    private Cell2 findCell(int rowIndex, int colIndex) {
         return board[rowIndex][colIndex];
     }
 
@@ -122,7 +119,7 @@ public class GameBoard {
     }
 
     public void open(int rowIndex, int colIndex) {
-        Cell cell = findCell(rowIndex, colIndex);
+        Cell2 cell = findCell(rowIndex, colIndex);
         cell.open();
     }
 
