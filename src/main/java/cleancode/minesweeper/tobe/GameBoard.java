@@ -126,11 +126,16 @@ public class GameBoard {
     }
 
     public boolean isAllCellChecked() {
-        return Arrays.stream(board)// BOARD 라는 이중 string 배열에 stream 을 걸면 String[] 형태의 Stream 이 나옴 Stream<String[]>
-                // 그냥 Map 을 하면 Stream<Stream<String>> 이 나오는데 flatMap 을 하면서 평탄화를 통해 이중배열을 배열로, 즉, Stream<String> 으로 만들어주는 것
-                .flatMap(stringArr -> Arrays.stream(stringArr)) // flatMap 을 하면 Stream<String> 이 생기는데 이 stringArray 를 하나씩 돌면서 다시 Stream<String[]> 만들거다
-                // 여기까지가 Stream<String>
-                .allMatch(Cell::isChecked);
+//        return Arrays.stream(board)// BOARD 라는 이중 string 배열에 stream 을 걸면 String[] 형태의 Stream 이 나옴 Stream<String[]>
+//                // 그냥 Map 을 하면 Stream<Stream<String>> 이 나오는데 flatMap 을 하면서 평탄화를 통해 이중배열을 배열로, 즉, Stream<String> 으로 만들어주는 것
+//                .flatMap(stringArr -> Arrays.stream(stringArr)) // flatMap 을 하면 Stream<String> 이 생기는데 이 stringArray 를 하나씩 돌면서 다시 Stream<String[]> 만들거다
+//                // 여기까지가 Stream<String>
+//                .allMatch(Cell::isChecked);
+
+        // cell 을 가공하던 책임이 cells 안으로 들어가면서 목록을 구성하는 책임이 Cells 안으로 들어감
+        Cells cells = Cells.from(board);
+        return cells.isAllChecked();
+
     }
 
     public String getSign(CellPosition cellPosition) {
