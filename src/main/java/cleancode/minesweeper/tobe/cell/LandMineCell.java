@@ -1,6 +1,6 @@
 package cleancode.minesweeper.tobe.cell;
 
-public class LandMineCell implements Cell2 {
+public class LandMineCell implements Cell {
     private static final String LAND_MINE_SIGN = "☼";
     private final CellState cellState = CellState.initialize();
 

@@ -2,31 +2,43 @@ package cleancode.minesweeper.tobe;
 
 import cleancode.minesweeper.tobe.cell.*;
 import cleancode.minesweeper.tobe.gamelevel.GameLevel;
+import cleancode.minesweeper.tobe.position.CellPosition;
+import cleancode.minesweeper.tobe.position.RelativePosition;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Stream;
 
 public class GameBoard {
-    private final Cell2[][] board;
+    private final Cell[][] board;
     private final int landMineCount;
 
     public GameBoard(GameLevel gameLevel) {
         int rowSize = gameLevel.getRowSize();
         int colSize = gameLevel.getColSize();
 
-        board = new Cell2[rowSize][colSize];
+        board = new Cell[rowSize][colSize];
 
         landMineCount = gameLevel.getLandMineCount();
     }
 
-    public void flag(int rowIndex, int colIndex) {
-        Cell2 cell = findCell(rowIndex, colIndex);
+    public void flagAt(CellPosition cellPosition) {
+        Cell cell = findCell(cellPosition);
         cell.flag();
     }
 
-    public boolean isLandMineCell(int selectedRowIndex, int selectedColIndex) {
-        Cell2 cell = findCell(selectedRowIndex, selectedColIndex);
+    public boolean isLandMineCellAt(CellPosition cellPosition) {
+        Cell cell = findCell(cellPosition);
         return cell.isLandMine();
+    }
+
+    public boolean isInvalidCellPosition(CellPosition cellPosition) {
+        int rowSize = getRowSize();
+        int colSize = getColSize();
+
+        return cellPosition.isRowIndexMoreThanOrEqual(rowSize)
+                || cellPosition.isColIndexMoreThanOrEqual(colSize);
     }
 
     public void initializeGame() {
@@ -48,12 +60,12 @@ public class GameBoard {
 
         for (int row = 0; row < rowSize; row++) {
             for (int col = 0; col < colSize; col++) {
-                int count = 0;
-                if (isLandMineCell(row, col)) {
+                CellPosition cellPosition = CellPosition.of(row, col);
+                if (isLandMineCellAt(cellPosition)) {
                     // 이미 셀의 기본속성을 0으로 바꿔서 따로 안해도 됨
                     continue;
                 }
-                count = countNearbyLandMines(row, col, count);
+                int count = countNearbyLandMines(cellPosition);
                 if (count == 0) // 기존에는 Cell 하나여서 괜찮았지만 이제 NumberCell 이 생겼으니 count == 0 일땐 NumberCell 을 생성하지 않도록 해야함
                     continue;
                 board[row][col] = new NumberCell(count);;
@@ -62,35 +74,51 @@ public class GameBoard {
         }
     }
 
-    private int countNearbyLandMines(int row, int col, int count) {
-        int rowSize = board.length;
-        int colSize = board[0].length;
+    private int countNearbyLandMines(CellPosition cellPosition) {
+        int rowSize = getRowSize();
+        int colSize = getColSize();
 
-        if (row - 1 >= 0 && col - 1 >= 0 && isLandMineCell(row - 1, col - 1)) {
-            count++;
-        }
-        if (row - 1 >= 0 && isLandMineCell(row - 1, col)) {
-            count++;
-        }
-        if (row - 1 >= 0 && col + 1 < colSize && isLandMineCell(row - 1, col + 1)) {
-            count++;
-        }
-        if (col - 1 >= 0 && isLandMineCell(row, col - 1)) {
-            count++;
-        }
-        if (col + 1 < colSize && isLandMineCell(row, col + 1)) {
-            count++;
-        }
-        if (row + 1 < rowSize && col - 1 >= 0 && isLandMineCell(row + 1, col - 1)) {
-            count++;
-        }
-        if (row + 1 < rowSize && isLandMineCell(row + 1, col)) {
-            count++;
-        }
-        if (row + 1 < rowSize && col + 1 < colSize && isLandMineCell(row + 1, col + 1)) {
-            count++;
-        }
-        return count;
+        long count = calculateSurroundedPositions(cellPosition, rowSize, colSize).stream()
+                .filter(this::isLandMineCellAt) // 이거 지뢰Cell 이야?
+                .count();
+
+        return (int) count;
+
+//        int count = 0;
+//        if (row - 1 >= 0 && col - 1 >= 0 && isLandMineCellAt(row - 1, col - 1)) {
+//            count++;
+//        }
+//        if (row - 1 >= 0 && isLandMineCellAt(row - 1, col)) {
+//            count++;
+//        }
+//        if (row - 1 >= 0 && col + 1 < colSize && isLandMineCellAt(row - 1, col + 1)) {
+//            count++;
+//        }
+//        if (col - 1 >= 0 && isLandMineCellAt(row, col - 1)) {
+//            count++;
+//        }
+//        if (col + 1 < colSize && isLandMineCellAt(row, col + 1)) {
+//            count++;
+//        }
+//        if (row + 1 < rowSize && col - 1 >= 0 && isLandMineCellAt(row + 1, col - 1)) {
+//            count++;
+//        }
+//        if (row + 1 < rowSize && isLandMineCellAt(row + 1, col)) {
+//            count++;
+//        }
+//        if (row + 1 < rowSize && col + 1 < colSize && isLandMineCellAt(row + 1, col + 1)) {
+//            count++;
+//        }
+//        return count;
+    }
+
+    private List<CellPosition> calculateSurroundedPositions(CellPosition cellPosition, int rowSize, int colSize) {
+        return RelativePosition.SURROUNDED_POSITION.stream()
+                .filter(relativePosition -> cellPosition.canCalculatePositionBy(relativePosition)) // relativePosition 이 계산 가능한 Position 이야? 0 이상이야?
+                .map(relativePosition -> cellPosition.calculatePositionBy(relativePosition)) // 그러면 relativePosition 으로 새로운 좌표 계산해!
+                .filter(position -> position.isRowIndexLessThan(rowSize)) // 근데 이거 boardSize 이상이야?
+                .filter(position -> position.isColIndexLessThan(colSize))
+                .toList();
     }
 
     public int getRowSize() {
@@ -102,65 +130,77 @@ public class GameBoard {
                 // 그냥 Map 을 하면 Stream<Stream<String>> 이 나오는데 flatMap 을 하면서 평탄화를 통해 이중배열을 배열로, 즉, Stream<String> 으로 만들어주는 것
                 .flatMap(stringArr -> Arrays.stream(stringArr)) // flatMap 을 하면 Stream<String> 이 생기는데 이 stringArray 를 하나씩 돌면서 다시 Stream<String[]> 만들거다
                 // 여기까지가 Stream<String>
-                .allMatch(Cell2::isChecked);
+                .allMatch(Cell::isChecked);
     }
 
-    public String getSign(int rowIndex, int colIndex) {
-        Cell2 cell = findCell(rowIndex, colIndex);
+    public String getSign(CellPosition cellPosition) {
+        Cell cell = findCell(cellPosition);
         return cell.getSign();
     }
 
-    private Cell2 findCell(int rowIndex, int colIndex) {
-        return board[rowIndex][colIndex];
+    private Cell findCell(CellPosition cellPosition) {
+        return board[cellPosition.getRowIndex()][cellPosition.getColIndex()];
     }
 
     public int getColSize() {
         return board[0].length;
     }
 
-    public void open(int rowIndex, int colIndex) {
-        Cell2 cell = findCell(rowIndex, colIndex);
+    public void openAt(CellPosition cellPosition) {
+        Cell cell = findCell(cellPosition);
         cell.open();
     }
 
-    public void openSurroundedCells(int row, int col) {
-        if (row < 0 || row >= getRowSize() || col < 0 || col >= getColSize()) {
+    public void openSurroundedCells(CellPosition cellPosition) {
+        if (cellPosition.isRowIndexMoreThanOrEqual(getRowSize())
+                || cellPosition.isColIndexMoreThanOrEqual(getColSize())) { // 얘도 바깥에서 BoardSize 보다 큰지는 확인했지만 재귀로 연산을 하기때문에 두어야 함.
             return;
         }
 
-        if (isOpenedCell(row, col)) {
+        if (isOpenedCell(cellPosition)) {
             return;
         }
 
-        if (isLandMineCell(row, col)) {
+        if (isLandMineCellAt(cellPosition)) {
             return;
         }
 
         // 여기까지 안열렸으면 아직 안열린 cell 이니까 열어!
-        open(row, col); // 오픈
+        openAt(cellPosition); // 오픈
 
-        if (doesCellHaveLandMineCount(row, col)) { // 숫자가 있으면!
+        if (doesCellHaveLandMineCount(cellPosition)) { // 숫자가 있으면!
             // 열고 숫자를 초기화 한 것임
 //            BOARD[row][col] = Cell.ofNearbyLandMineCount(NEAR_BY_LAND_MINE_COUNTS[row][col]);
             return;
         }
 
-        // 재귀임 // 오픈을 시작하고 멈추는건 숫자일때, 지뢰일때임
-        openSurroundedCells(row - 1, col - 1);
-        openSurroundedCells(row - 1, col);
-        openSurroundedCells(row - 1, col + 1);
-        openSurroundedCells(row, col - 1);
-        openSurroundedCells(row, col + 1);
-        openSurroundedCells(row + 1, col - 1);
-        openSurroundedCells(row + 1, col);
-        openSurroundedCells(row + 1, col + 1);
+        calculateSurroundedPositions(cellPosition, getRowSize(), getColSize())
+                .forEach(this::openSurroundedCells);
+//        ==
+//        RelativePosition.SURROUNDED_POSITION.stream()
+//                .filter(relativePosition -> cellPosition.canCalculatePositionBy(relativePosition)) // if 는 filter // cellPosition 이 canCalculate 한지
+//                .map(relativePosition -> cellPosition.calculatePositionBy(relativePosition)) // relativePosition 이 주어졌을 때 calculatePositionBy 를 하면 새로운 cellPosition 들이 우루루 나옴
+//                .filter(position -> position.isRowIndexLessThan(getRowSize())) // board RowSize 와 생성된 Cell 의 row position 체크
+//                .filter(position -> position.isColIndexLessThan(getColSize())) // board ColSize 와 생성된 Cell 의 col psoition 체크
+//                .forEach(this::openSurroundedCells); // 이것에 대해 openSurroundedCells 호출
+//        ==
+//        for (RelativePosition relativePosition : RelativePosition.SURROUNDED_POSITION) {
+//            if (cellPosition.canCalculatePositionBy(relativePosition)) {
+//                // 둘다 0 보다 컸을때 새로운 cellposition 을 만들 수 있음!
+//                CellPosition nextCellPosition = cellPosition.calculatePositionBy(relativePosition);
+//                openSurroundedCells(nextCellPosition);
+//            }
+//        }
     }
 
-    private boolean doesCellHaveLandMineCount(int row, int col) {
-        return findCell(row, col).hasLandMineCount();
+
+    private boolean doesCellHaveLandMineCount(CellPosition cellPosition) {
+        Cell cell = findCell(cellPosition);
+        return cell.hasLandMineCount();
     }
 
-    private boolean isOpenedCell(int row, int col) {
-        return findCell(row, col).isOpened();
+    private boolean isOpenedCell(CellPosition cellPosition) {
+        Cell cell = findCell(cellPosition);
+        return cell.isOpened();
     }
 }
