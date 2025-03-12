@@ -35,6 +35,10 @@ public class CellSnapshot {
         return new CellSnapshot(CellSnapshotStatus.UNCHECKED, 0);
     }
 
+    public boolean isSameStatus(CellSnapshotStatus cellSnapshotStatus) {
+        return this.status == cellSnapshotStatus; // 들어온 status 랑 내가 갖고있는 status 가 같은지 확인
+    }
+
     public CellSnapshotStatus getStatus() {
         return status;
     }
@@ -42,8 +46,8 @@ public class CellSnapshot {
     public int getNearbyLandMineCount() {
         return nearbyLandMineCount;
     }
-
     // value object 니까!
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
