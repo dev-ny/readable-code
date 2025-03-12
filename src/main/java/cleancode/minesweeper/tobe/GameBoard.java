@@ -3,12 +3,10 @@ package cleancode.minesweeper.tobe;
 import cleancode.minesweeper.tobe.cell.*;
 import cleancode.minesweeper.tobe.gamelevel.GameLevel;
 import cleancode.minesweeper.tobe.position.CellPosition;
+import cleancode.minesweeper.tobe.position.CellPositions;
 import cleancode.minesweeper.tobe.position.RelativePosition;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Stream;
 
 public class GameBoard {
     private final Cell[][] board;
@@ -42,36 +40,41 @@ public class GameBoard {
     }
 
     public void initializeGame() {
-        int rowSize = getRowSize();
-        int colSize = getColSize();
+        CellPositions cellPositions = CellPositions.from(board);
 
-        for (int row = 0; row < rowSize; row++) {
-            for (int col = 0; col < colSize; col++) {
-                board[row][col] = new EmptyCell();
+        initializeEmptyCells(cellPositions);
+
+        List<CellPosition> landMinePositions =  cellPositions.extractRandomPositions(landMineCount);
+        initializeLandMineCells(landMinePositions);
+
+        List<CellPosition> numberPositionCandidates = cellPositions.subtract(landMinePositions); // 너가 가진 거에서 파라미터가 주어진 것을 뺀 나머지 position 을 줘
+        initializeNumberCells(numberPositionCandidates);
+    }
+
+    private void initializeEmptyCells(CellPositions cellPositions) {
+        List<CellPosition> allPositions = cellPositions.getPositions();
+        for (CellPosition position: allPositions) {
+            updateCellAt(position, new EmptyCell());
+        }
+    }
+
+    private void initializeLandMineCells(List<CellPosition> landMinePositions) {
+        for (CellPosition position: landMinePositions) {
+            updateCellAt(position, new LandMineCell());
+        }
+    }
+
+    private void initializeNumberCells(List<CellPosition> numberPositionCandidates) {
+        for (CellPosition candidatePosition : numberPositionCandidates) {
+            int count = countNearbyLandMines(candidatePosition);
+            if (count != 0) {
+                updateCellAt(candidatePosition, new NumberCell(count));
             }
         }
+    }
 
-        for (int i = 0; i < landMineCount; i++) { // 10 이 col 숫자가아니라 지뢰숫자
-            int landMineCol = new Random().nextInt(colSize);
-            int landMineRow = new Random().nextInt(rowSize);
-            board[landMineRow][landMineCol] = new LandMineCell();
-//            findCell(landMineRow, landMineCol).turnOnLandMine();
-        }
-
-        for (int row = 0; row < rowSize; row++) {
-            for (int col = 0; col < colSize; col++) {
-                CellPosition cellPosition = CellPosition.of(row, col);
-                if (isLandMineCellAt(cellPosition)) {
-                    // 이미 셀의 기본속성을 0으로 바꿔서 따로 안해도 됨
-                    continue;
-                }
-                int count = countNearbyLandMines(cellPosition);
-                if (count == 0) // 기존에는 Cell 하나여서 괜찮았지만 이제 NumberCell 이 생겼으니 count == 0 일땐 NumberCell 을 생성하지 않도록 해야함
-                    continue;
-                board[row][col] = new NumberCell(count);;
-//                findCell(row, col).updateNearbyLandMineCount(count);
-            }
-        }
+    private void updateCellAt(CellPosition position, Cell cell) {
+        board[position.getRowIndex()][position.getColIndex()] = cell;
     }
 
     private int countNearbyLandMines(CellPosition cellPosition) {
