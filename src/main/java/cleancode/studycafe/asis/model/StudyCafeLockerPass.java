@@ -16,13 +16,13 @@ public class StudyCafeLockerPass {
         return new StudyCafeLockerPass(passType, duration, price);
     }
 
-    public StudyCafePassType getPassType() {
-        return passType;
-    }
-
-    public int getDuration() {
-        return duration;
-    }
+//    public StudyCafePassType getPassType() {
+//        return passType;
+//    }
+//
+//    public int getDuration() {
+//        return duration;
+//    }
 
     public int getPrice() {
         return price;
@@ -41,4 +41,8 @@ public class StudyCafeLockerPass {
         return "";
     }
 
+    public boolean isSelectedLockerPassType(StudyCafePass selectedPass) {
+        return this.passType == selectedPass.getPassType() &&
+                this.duration == selectedPass.getDuration();
+    }
 }

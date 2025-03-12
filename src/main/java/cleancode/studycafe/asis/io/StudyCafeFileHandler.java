@@ -11,7 +11,7 @@ import cleancode.studycafe.asis.model.StudyCafePass;
 import cleancode.studycafe.asis.model.StudyCafePassType;
 
 public class StudyCafeFileHandler {
-
+     // 이용권 목록을 파일로 읽는다.
     public List<StudyCafePass> readStudyCafePasses() {
         try {
             List<String> lines = Files.readAllLines(Paths.get("src/main/resources/cleancode/studycafe/pass-list.csv"));
