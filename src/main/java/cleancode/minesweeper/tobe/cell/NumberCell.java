@@ -19,14 +19,14 @@ public class NumberCell implements Cell {
     }
 
     @Override
-    public CellSnapShot getSnapshot() {
+    public CellSnapshot getSnapshot() {
         if (cellState.isOpened()) {
-            return CellSnapShot.ofNumber(nearbyLandMineCount);
+            return CellSnapshot.ofNumber(nearbyLandMineCount);
         }
         if (cellState.isFlagged()) {
-            return CellSnapShot.ofFlag();
+            return CellSnapshot.ofFlag();
         }
-        return CellSnapShot.ofUnChecked();
+        return CellSnapshot.ofUnChecked();
     }
 
     @Override

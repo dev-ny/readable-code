@@ -2,7 +2,7 @@ package cleancode.minesweeper.tobe.io;
 
 import cleancode.minesweeper.tobe.GameBoard;
 import cleancode.minesweeper.tobe.GameException;
-import cleancode.minesweeper.tobe.cell.CellSnapShot;
+import cleancode.minesweeper.tobe.cell.CellSnapshot;
 import cleancode.minesweeper.tobe.cell.CellSnapshotStatus;
 import cleancode.minesweeper.tobe.position.CellPosition;
 
@@ -32,7 +32,7 @@ public class ConsoleOutputHandler implements OutputHandler {
             System.out.printf("%2d  ", row + 1); // 2자리 수 이상일때 col 정렬 맞출 수 있도록 함
             for (int col = 0; col < board.getColSize(); col++) {
                 CellPosition cellPosition = CellPosition.of(row, col);
-                CellSnapShot snapShot = board.getSnapshot(cellPosition);
+                CellSnapshot snapShot = board.getSnapshot(cellPosition);
                 String cellSign = decideCellSignFrom(snapShot);
                 System.out.print(cellSign + " ");
 //                System.out.print(board.getSign(cellPosition) + " "); // 여기는 getter 를 안쓰는게 이상해 // 내가 여기에 보드를 그릴테니 cell 내용을 줘!
@@ -42,7 +42,7 @@ public class ConsoleOutputHandler implements OutputHandler {
         System.out.println();
     }
 
-    private String decideCellSignFrom(CellSnapShot snapShot) {
+    private String decideCellSignFrom(CellSnapshot snapShot) {
         CellSnapshotStatus status = snapShot.getStatus();
         if (status == CellSnapshotStatus.EMPTY) {
             return EMPTY_SIGN;

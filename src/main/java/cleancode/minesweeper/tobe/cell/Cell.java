@@ -15,5 +15,5 @@ public interface Cell {
 
     boolean isOpened();
 
-    CellSnapShot getSnapshot();
+    CellSnapshot getSnapshot();
 }
