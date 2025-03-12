@@ -30,7 +30,8 @@ public class ConsoleOutputHandler implements OutputHandler {
             for (int col = 0; col < board.getColSize(); col++) {
                 CellPosition cellPosition = CellPosition.of(row, col);
                 CellSnapshot snapShot = board.getSnapshot(cellPosition);
-                String cellSign = cellSignFinder.findCellSignFrom(snapShot);
+//                String cellSign = cellSignFinder.findCellSignFrom(snapShot);
+                String cellSign = CellSignProvider.findCellSignFrom(snapShot);
                 System.out.print(cellSign + " ");
 //                System.out.print(board.getSign(cellPosition) + " "); // 여기는 getter 를 안쓰는게 이상해 // 내가 여기에 보드를 그릴테니 cell 내용을 줘!
             }
