@@ -23,41 +23,7 @@ public class GameBoard {
         initializeGameStatus();
     }
 
-    public void flagAt(CellPosition cellPosition) {
-        Cell cell = findCell(cellPosition);
-        cell.flag();
-
-        checkIfGameIsOver();
-
-    }
-    private void checkIfGameIsOver() {
-        if (isAllCellChecked()) { // 게임 이긴 것
-            changeGameStatusToWin();
-        }
-    }
-
-    private void changeGameStatusToWin() {
-        gameStatus = GameStatus.WIN;
-    }
-
-    public boolean isLandMineCellAt(CellPosition cellPosition) {
-        Cell cell = findCell(cellPosition);
-        return cell.isLandMine();
-    }
-
-    public boolean isInvalidCellPosition(CellPosition cellPosition) {
-        int rowSize = getRowSize();
-        int colSize = getColSize();
-
-        return cellPosition.isRowIndexMoreThanOrEqual(rowSize)
-                || cellPosition.isColIndexMoreThanOrEqual(colSize);
-    }
-
-    public CellSnapshot getSnapshot(CellPosition cellPosition) {
-        Cell cell = findCell(cellPosition);
-        return cell.getSnapshot();
-    }
-
+    // 상태 변경
     public void initializeGame() {
         initializeGameStatus();
         CellPositions cellPositions = CellPositions.from(board);
@@ -70,6 +36,60 @@ public class GameBoard {
         List<CellPosition> numberPositionCandidates = cellPositions.subtract(landMinePositions); // 너가 가진 거에서 파라미터가 주어진 것을 뺀 나머지 position 을 줘
         initializeNumberCells(numberPositionCandidates);
     }
+
+    public void openAt(CellPosition cellPosition) {
+        if (isLandMineCellAt(cellPosition)) {
+            openOneCell(cellPosition);
+            changeGameStatusToLose();
+            return;
+        }
+
+        openSurroundedCells(cellPosition);
+        checkIfGameIsOver();
+        return;
+    }
+
+    public void flagAt(CellPosition cellPosition) {    // Cell 의 상태 변경
+        Cell cell = findCell(cellPosition);
+        cell.flag();
+
+        checkIfGameIsOver();
+    }
+
+    // 판별
+    public boolean isInvalidCellPosition(CellPosition cellPosition) {
+        int rowSize = getRowSize();
+        int colSize = getColSize();
+
+        return cellPosition.isRowIndexMoreThanOrEqual(rowSize)
+                || cellPosition.isColIndexMoreThanOrEqual(colSize);
+    }
+    public boolean isInProgress() {
+        return gameStatus == GameStatus.IN_PROGRESS;
+    }
+
+    public boolean isWinStatus() {
+        return gameStatus == GameStatus.WIN;
+    }
+
+    public boolean isLoseStatus() {
+        return gameStatus == GameStatus.LOSE;
+    }
+
+    // 조회
+    public CellSnapshot getSnapshot(CellPosition cellPosition) {
+        Cell cell = findCell(cellPosition);
+        return cell.getSnapshot();
+    }
+
+    public int getRowSize() {
+        return board.length;
+    }
+
+    public int getColSize() {
+        return board[0].length;
+    }
+
 
     private void initializeGameStatus() {
         gameStatus = GameStatus.IN_PROGRESS;
@@ -95,10 +115,6 @@ public class GameBoard {
                 updateCellAt(candidatePosition, new NumberCell(count));
             }
         }
-    }
-
-    private void updateCellAt(CellPosition position, Cell cell) {
-        board[position.getRowIndex()][position.getColIndex()] = cell;
     }
 
     private int countNearbyLandMines(CellPosition cellPosition) {
@@ -138,7 +154,6 @@ public class GameBoard {
 //        }
 //        return count;
     }
-
     private List<CellPosition> calculateSurroundedPositions(CellPosition cellPosition, int rowSize, int colSize) {
         return RelativePosition.SURROUNDED_POSITION.stream()
                 .filter(relativePosition -> cellPosition.canCalculatePositionBy(relativePosition)) // relativePosition 이 계산 가능한 Position 이야? 0 이상이야?
@@ -148,37 +163,16 @@ public class GameBoard {
                 .toList();
     }
 
-    public int getRowSize() {
-        return board.length;
+    private void updateCellAt(CellPosition position, Cell cell) {
+        board[position.getRowIndex()][position.getColIndex()] = cell;
     }
 
-    public boolean isAllCellChecked() {
-//        return Arrays.stream(board)// BOARD 라는 이중 string 배열에 stream 을 걸면 String[] 형태의 Stream 이 나옴 Stream<String[]>
-//                // 그냥 Map 을 하면 Stream<Stream<String>> 이 나오는데 flatMap 을 하면서 평탄화를 통해 이중배열을 배열로, 즉, Stream<String> 으로 만들어주는 것
-//                .flatMap(stringArr -> Arrays.stream(stringArr)) // flatMap 을 하면 Stream<String> 이 생기는데 이 stringArray 를 하나씩 돌면서 다시 Stream<String[]> 만들거다
-//                // 여기까지가 Stream<String>
-//                .allMatch(Cell::isChecked);
-
-        // cell 을 가공하던 책임이 cells 안으로 들어가면서 목록을 구성하는 책임이 Cells 안으로 들어감
-        Cells cells = Cells.from(board);
-        return cells.isAllChecked();
-
-    }
-
-    private Cell findCell(CellPosition cellPosition) {
-        return board[cellPosition.getRowIndex()][cellPosition.getColIndex()];
-    }
-
-    public int getColSize() {
-        return board[0].length;
-    }
-
-    public void openOneCell(CellPosition cellPosition) {
+    private void openOneCell(CellPosition cellPosition) {
         Cell cell = findCell(cellPosition);
         cell.open();
     }
 
-    public void openSurroundedCells(CellPosition cellPosition) {
+    private void openSurroundedCells(CellPosition cellPosition) {
         if (cellPosition.isRowIndexMoreThanOrEqual(getRowSize())
                 || cellPosition.isColIndexMoreThanOrEqual(getColSize())) { // 얘도 바깥에서 BoardSize 보다 큰지는 확인했지만 재귀로 연산을 하기때문에 두어야 함.
             return;
@@ -220,42 +214,49 @@ public class GameBoard {
 //        }
     }
 
+    private boolean isOpenedCell(CellPosition cellPosition) {
+        Cell cell = findCell(cellPosition);
+        return cell.isOpened();
+    }
+
+    private boolean isLandMineCellAt(CellPosition cellPosition) {
+        Cell cell = findCell(cellPosition);
+        return cell.isLandMine();
+    }
 
     private boolean doesCellHaveLandMineCount(CellPosition cellPosition) {
         Cell cell = findCell(cellPosition);
         return cell.hasLandMineCount();
     }
 
-    private boolean isOpenedCell(CellPosition cellPosition) {
-        Cell cell = findCell(cellPosition);
-        return cell.isOpened();
-    }
-
-    public boolean isInProgress() {
-        return gameStatus == GameStatus.IN_PROGRESS;
-    }
-
-    public void openAt(CellPosition cellPosition) {
-        if (isLandMineCellAt(cellPosition)) {
-            openOneCell(cellPosition);
-            changeGameStatusToLose();
-            return;
+    private void checkIfGameIsOver() {
+        if (isAllCellChecked()) { // 게임 이긴 것
+            changeGameStatusToWin();
         }
+    }
 
-        openSurroundedCells(cellPosition);
-        checkIfGameIsOver();
-        return;
+    private boolean isAllCellChecked() {
+//        return Arrays.stream(board)// BOARD 라는 이중 string 배열에 stream 을 걸면 String[] 형태의 Stream 이 나옴 Stream<String[]>
+//                // 그냥 Map 을 하면 Stream<Stream<String>> 이 나오는데 flatMap 을 하면서 평탄화를 통해 이중배열을 배열로, 즉, Stream<String> 으로 만들어주는 것
+//                .flatMap(stringArr -> Arrays.stream(stringArr)) // flatMap 을 하면 Stream<String> 이 생기는데 이 stringArray 를 하나씩 돌면서 다시 Stream<String[]> 만들거다
+//                // 여기까지가 Stream<String>
+//                .allMatch(Cell::isChecked);
+
+        // cell 을 가공하던 책임이 cells 안으로 들어가면서 목록을 구성하는 책임이 Cells 안으로 들어감
+        Cells cells = Cells.from(board);
+        return cells.isAllChecked();
+
     }
 
     private void changeGameStatusToLose() {
         gameStatus = GameStatus.LOSE;
     }
 
-    public boolean isWinStatus() {
-        return gameStatus == GameStatus.WIN;
+    private void changeGameStatusToWin() {
+        gameStatus = GameStatus.WIN;
     }
 
-    public boolean isLoseStatus() {
-        return gameStatus == GameStatus.LOSE;
+    private Cell findCell(CellPosition cellPosition) {
+        return board[cellPosition.getRowIndex()][cellPosition.getColIndex()];
     }
 }

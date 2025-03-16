@@ -65,6 +65,23 @@ public class Minesweeper implements GameInitializable, GameRunnable {
         }
     }
 
+    private CellPosition getCellInputFromUser() {
+        outputHandler.showCommentForSelectingCell();
+        CellPosition cellPosition = inputHandler.getCellPositionFromUser(); // 이때, index 로서의 기능은 할 수 있게 함.
+        // 보드 길이에 따른 Position 검증은 GameBoard 에!
+        // 한군데서 하면 되는데 너무 잘게 쪼개는거 아닌가요? -> 그렇게 느낄 수 있겠지만 책임을 조금 분리!
+        // 보드가 있는 곳에서 자연스럽게 검증을 해보자!
+        if (gameBoard.isInvalidCellPosition(cellPosition)) {
+            throw new GameException("잘못된 좌표를 선택하셨습니다.");
+        }
+        return cellPosition;
+    }
+
+    private UserAction getUserActionInputFromUser() {
+        outputHandler.showCommentFOrUserAction();
+        return inputHandler.getUserActionFromUser() ;
+    }
+
     private void actOnCell(CellPosition cellPosition, UserAction userAction) {
 
         if (doesUserChooseToPlantFlag(userAction)) {
@@ -80,29 +97,12 @@ public class Minesweeper implements GameInitializable, GameRunnable {
         System.out.println("잘못된 번호를 선택하셨습니다.");
     }
 
-    private boolean doesUserChooseToOpenCell(UserAction userAction) {
-        return userAction == UserAction.OPEN;
-    }
-
     private boolean doesUserChooseToPlantFlag(UserAction userAction) {
         return userAction == UserAction.FLAG;
     }
 
-    private UserAction getUserActionInputFromUser() {
-        outputHandler.showCommentFOrUserAction();
-        return inputHandler.getUserActionFromUser() ;
-    }
-
-    private CellPosition getCellInputFromUser() {
-        outputHandler.showCommentForSelectingCell();
-        CellPosition cellPosition = inputHandler.getCellPositionFromUser(); // 이때, index 로서의 기능은 할 수 있게 함.
-        // 보드 길이에 따른 Position 검증은 GameBoard 에!
-        // 한군데서 하면 되는데 너무 잘게 쪼개는거 아닌가요? -> 그렇게 느낄 수 있겠지만 책임을 조금 분리!
-        // 보드가 있는 곳에서 자연스럽게 검증을 해보자!
-        if (gameBoard.isInvalidCellPosition(cellPosition)) {
-            throw new GameException("잘못된 좌표를 선택하셨습니다.");
-        }
-        return cellPosition;
+    private boolean doesUserChooseToOpenCell(UserAction userAction) {
+        return userAction == UserAction.OPEN;
     }
 
 //    private boolean isAllCellOpened() {
