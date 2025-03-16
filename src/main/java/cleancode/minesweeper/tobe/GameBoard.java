@@ -11,6 +11,7 @@ import java.util.List;
 public class GameBoard {
     private final Cell[][] board;
     private final int landMineCount;
+    private GameStatus gameStatus;
 
     public GameBoard(GameLevel gameLevel) {
         int rowSize = gameLevel.getRowSize();
@@ -19,11 +20,24 @@ public class GameBoard {
         board = new Cell[rowSize][colSize];
 
         landMineCount = gameLevel.getLandMineCount();
+        initializeGameStatus();
     }
 
     public void flagAt(CellPosition cellPosition) {
         Cell cell = findCell(cellPosition);
         cell.flag();
+
+        checkIfGameIsOver();
+
+    }
+    private void checkIfGameIsOver() {
+        if (isAllCellChecked()) { // 게임 이긴 것
+            changeGameStatusToWin();
+        }
+    }
+
+    private void changeGameStatusToWin() {
+        gameStatus = GameStatus.WIN;
     }
 
     public boolean isLandMineCellAt(CellPosition cellPosition) {
@@ -45,6 +59,7 @@ public class GameBoard {
     }
 
     public void initializeGame() {
+        initializeGameStatus();
         CellPositions cellPositions = CellPositions.from(board);
 
         initializeEmptyCells(cellPositions);
@@ -54,6 +69,10 @@ public class GameBoard {
 
         List<CellPosition> numberPositionCandidates = cellPositions.subtract(landMinePositions); // 너가 가진 거에서 파라미터가 주어진 것을 뺀 나머지 position 을 줘
         initializeNumberCells(numberPositionCandidates);
+    }
+
+    private void initializeGameStatus() {
+        gameStatus = GameStatus.IN_PROGRESS;
     }
 
     private void initializeEmptyCells(CellPositions cellPositions) {
@@ -154,7 +173,7 @@ public class GameBoard {
         return board[0].length;
     }
 
-    public void openAt(CellPosition cellPosition) {
+    public void openOneCell(CellPosition cellPosition) {
         Cell cell = findCell(cellPosition);
         cell.open();
     }
@@ -174,7 +193,7 @@ public class GameBoard {
         }
 
         // 여기까지 안열렸으면 아직 안열린 cell 이니까 열어!
-        openAt(cellPosition); // 오픈
+        openOneCell(cellPosition); // 오픈
 
         if (doesCellHaveLandMineCount(cellPosition)) { // 숫자가 있으면!
             // 열고 숫자를 초기화 한 것임
@@ -210,5 +229,33 @@ public class GameBoard {
     private boolean isOpenedCell(CellPosition cellPosition) {
         Cell cell = findCell(cellPosition);
         return cell.isOpened();
+    }
+
+    public boolean isInProgress() {
+        return gameStatus == GameStatus.IN_PROGRESS;
+    }
+
+    public void openAt(CellPosition cellPosition) {
+        if (isLandMineCellAt(cellPosition)) {
+            openOneCell(cellPosition);
+            changeGameStatusToLose();
+            return;
+        }
+
+        openSurroundedCells(cellPosition);
+        checkIfGameIsOver();
+        return;
+    }
+
+    private void changeGameStatusToLose() {
+        gameStatus = GameStatus.LOSE;
+    }
+
+    public boolean isWinStatus() {
+        return gameStatus == GameStatus.WIN;
+    }
+
+    public boolean isLoseStatus() {
+        return gameStatus == GameStatus.LOSE;
     }
 }
