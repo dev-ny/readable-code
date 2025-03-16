@@ -1,12 +1,15 @@
 package cleancode.minesweeper.tobe;
 
-import cleancode.minesweeper.tobe.config.GameConfig;
+import cleancode.minesweeper.tobe.minesweeper.board.GameBoard;
+import cleancode.minesweeper.tobe.minesweeper.config.GameConfig;
+import cleancode.minesweeper.tobe.minesweeper.exception.GameException;
 import cleancode.minesweeper.tobe.game.GameInitializable;
 import cleancode.minesweeper.tobe.game.GameRunnable;
-import cleancode.minesweeper.tobe.io.InputHandler;
-import cleancode.minesweeper.tobe.io.OutputHandler;
-import cleancode.minesweeper.tobe.position.CellPosition;
-import cleancode.minesweeper.tobe.user.UserAction;
+import cleancode.minesweeper.tobe.minesweeper.io.BoardIndexConverter;
+import cleancode.minesweeper.tobe.minesweeper.io.InputHandler;
+import cleancode.minesweeper.tobe.minesweeper.io.OutputHandler;
+import cleancode.minesweeper.tobe.minesweeper.board.position.CellPosition;
+import cleancode.minesweeper.tobe.minesweeper.user.UserAction;
 
 // 모든 지뢰찾기 게임 로직을 여기에 둘 것임
 public class Minesweeper implements GameInitializable, GameRunnable {
