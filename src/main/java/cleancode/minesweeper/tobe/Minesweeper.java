@@ -40,18 +40,9 @@ public class Minesweeper implements GameInitializable, GameRunnable {
     public void run() {
         outputHandler.showGameStartCommand();
 
-        while (true) {
+        while (GameStatus.IN_PROGRESS == gameStatus) {
             try {
                 outputHandler.showBoard(gameBoard);
-
-                if (doesUserWinTheGame()) {
-                    outputHandler.showGameWinningComment();
-                    break;
-                }
-                if (doesUserLoseTheGame()) {
-                    outputHandler.showGameLosingComment();
-                    break;
-                }
 
 //                String cellInput = getCellInputFromUser();
                 CellPosition cellInput = getCellInputFromUser();
@@ -65,6 +56,15 @@ public class Minesweeper implements GameInitializable, GameRunnable {
                 outputHandler.showSimpleMessage("프로그램에 문제가 생겼습니다.");
 //                e.printStackTrace(); // 실무에서는 Antipattern 실무에서는 log 시스템에서 log 를 남기고 별도의 조치를 취함
             }
+        }
+
+        outputHandler.showBoard(gameBoard); // 마지막 결과값 보여줌
+
+        if (doesUserWinTheGame()) {
+            outputHandler.showGameWinningComment();
+        }
+        if (doesUserLoseTheGame()) {
+            outputHandler.showGameLosingComment();
         }
     }
 
