@@ -75,6 +75,6 @@ public class CellPosition {
     }
 
     public boolean isColIndexLessThan(int colIndex) {
-        return this.colIndex < rowIndex;
+        return this.colIndex < colIndex;
     }
 }
