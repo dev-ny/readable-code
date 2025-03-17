@@ -7,6 +7,7 @@ import cleancode.minesweeper.tobe.minesweeper.board.position.RelativePosition;
 import cleancode.minesweeper.tobe.minesweeper.board.cell.*;
 
 import java.util.List;
+import java.util.Stack;
 
 public class GameBoard {
     private final Cell[][] board;
@@ -44,7 +45,7 @@ public class GameBoard {
             return;
         }
 
-        openSurroundedCells(cellPosition);
+        openSurroundedCells2(cellPosition);
         checkIfGameIsOver();
         return;
     }
@@ -212,6 +213,46 @@ public class GameBoard {
 //                openSurroundedCells(nextCellPosition);
 //            }
 //        }
+    }
+
+    private void openSurroundedCells2(CellPosition cellPosition) {
+        // cellPosition 을 담는 stack 을 사용하겠다
+        Stack<CellPosition> stack = new Stack<>();
+        stack.push(cellPosition);
+
+        while(!stack.isEmpty()) {
+            openAndPushCellAt(stack);
+        }
+
+    }
+
+    private void openAndPushCellAt(Stack<CellPosition> stack) {
+//        if (cellPosition.isRowIndexMoreThanOrEqual(getRowSize())
+//                || cellPosition.isColIndexMoreThanOrEqual(getColSize())) { // 얘도 바깥에서 BoardSize 보다 큰지는 확인했지만 재귀로 연산을 하기때문에 두어야 함.
+//            return;
+//        }
+        CellPosition currentCellPosition = stack.pop();
+        if (isOpenedCell(currentCellPosition)) {
+            return;
+        }
+
+        if (isLandMineCellAt(currentCellPosition)) {
+            return;
+        }
+
+        // 여기까지 안열렸으면 아직 안열린 cell 이니까 열어!
+        openOneCell(currentCellPosition); // 오픈
+
+        if (doesCellHaveLandMineCount(currentCellPosition)) { // 숫자가 있으면!
+            // 열고 숫자를 초기화 한 것임
+//            BOARD[row][col] = Cell.ofNearbyLandMineCount(NEAR_BY_LAND_MINE_COUNTS[row][col]);
+            return;
+        }
+
+        List<CellPosition> surroundedPositions = calculateSurroundedPositions(currentCellPosition, getRowSize(), getColSize()); // 다음 레벨에 있는 node
+        for (CellPosition cellPosition : surroundedPositions) {
+            stack.push(cellPosition);
+        }
     }
 
     private boolean isOpenedCell(CellPosition cellPosition) {
