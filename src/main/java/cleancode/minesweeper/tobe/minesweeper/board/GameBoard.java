@@ -7,6 +7,7 @@ import cleancode.minesweeper.tobe.minesweeper.board.position.RelativePosition;
 import cleancode.minesweeper.tobe.minesweeper.board.cell.*;
 
 import java.util.List;
+import java.util.Stack;
 
 public class GameBoard {
     private final Cell[][] board;
@@ -44,7 +45,8 @@ public class GameBoard {
             return;
         }
 
-        openSurroundedCells(cellPosition);
+        openSurroundedCells2(cellPosition);
+//        openSurroundedCells(cellPosition);
         checkIfGameIsOver();
         return;
     }
@@ -212,6 +214,49 @@ public class GameBoard {
 //                openSurroundedCells(nextCellPosition);
 //            }
 //        }
+    }
+
+    private void openSurroundedCells2(CellPosition cellPosition) {
+        // 쓰레드로 갖고 있는 Stack 영역을 Stack 자료구조로 사용하는 것이 아니고
+        // Cell Position 을 담는 Stack 을 만들어서 쓰겠다.
+        Stack<CellPosition> stack = new Stack<>();
+        stack.push(cellPosition); // 처음 들어온 cellPosition 일단 열어
+
+        while (!stack.isEmpty()) {
+            openAndPushCellAt(stack);
+        }
+    }
+
+    private void openAndPushCellAt(Stack<CellPosition> stack) {
+        CellPosition currentCellPosition = stack.pop();
+
+
+        if (isOpenedCell(currentCellPosition)) {
+            return;
+        }
+
+        if (isLandMineCellAt(currentCellPosition)) {
+            return;
+        }
+
+        // 여기까지 안열렸으면 아직 안열린 cell 이니까 열어!
+        openOneCell(currentCellPosition); // 오픈
+
+        if (doesCellHaveLandMineCount(currentCellPosition)) { // 숫자가 있으면!
+            // 열고 숫자를 초기화 한 것임
+//            BOARD[row][col] = Cell.ofNearbyLandMineCount(NEAR_BY_LAND_MINE_COUNTS[row][col]);
+            return;
+        }
+
+
+        // 기존 재귀함수
+//        calculateSurroundedPositions(currentCellPosition, getRowSize(), getColSize())
+//                .forEach(this::openSurroundedCells);
+
+        List<CellPosition> surroundedPositions = calculateSurroundedPositions(currentCellPosition, getRowSize(), getColSize());
+        for (CellPosition surroundedPosition: surroundedPositions) {
+            stack.push(surroundedPosition);
+        }
     }
 
     private boolean isOpenedCell(CellPosition cellPosition) {
