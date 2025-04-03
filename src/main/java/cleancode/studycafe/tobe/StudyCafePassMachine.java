@@ -20,15 +20,7 @@ public class StudyCafePassMachine {
             outputHandler.showWelcomeMessage();
             outputHandler.showAnnouncement();
 
-            outputHandler.askPassTypeSelection();
-            StudyCafePassType studyCafePassType = inputHandler.getPassTypeSelectingUserAction();
-
-            List<StudyCafePass> studyCafePasses = studyCafeFileHandler.readStudyCafePasses();
-            List<StudyCafePass> passCandidates = studyCafePasses.stream()
-                .filter(studyCafePass -> studyCafePass.getPassType() == studyCafePassType)
-                .toList();
-            outputHandler.showPassListForSelection(passCandidates);
-            StudyCafePass selectedPass = inputHandler.getSelectPass(passCandidates);
+            StudyCafePass selectedPass = selectPass();
 
             StudyCafeLockerPass lockerPass = selectLockerPass(selectedPass);
 
@@ -41,20 +33,37 @@ public class StudyCafePassMachine {
         }
     }
 
+    /**
+     * 사용자에게 어떤 패스타입을 사용할 것인지 물어보고
+     * 패스권의 후보들을 가져온 다음에
+     * 패스 리스트를 사용자들에게 보여주고
+     * 사용자에게 선택하게 함.
+     * @return StudyCafePass
+     */
+    private StudyCafePass selectPass() {
+        outputHandler.askPassTypeSelection();
+        StudyCafePassType studyCafePassType = inputHandler.getPassTypeSelectingUserAction();
+
+        List<StudyCafePass> passCandidates = findPassCandidatesBy(studyCafePassType);
+        outputHandler.showPassListForSelection(passCandidates);
+        StudyCafePass selectedPass = inputHandler.getSelectPass(passCandidates);
+        return selectedPass;
+    }
+
+    // 후보 추출
+    private List<StudyCafePass> findPassCandidatesBy(StudyCafePassType studyCafePassType) {
+        List<StudyCafePass> studyCafePasses = studyCafeFileHandler.readStudyCafePasses();
+        return studyCafePasses.stream()
+            .filter(studyCafePass -> studyCafePass.getPassType() == studyCafePassType)
+            .toList();
+    }
+
     private StudyCafeLockerPass selectLockerPass(StudyCafePass selectedPass) {
         if (selectedPass.getPassType() != StudyCafePassType.FIXED) {
             return null; // FIXED 일때만 사물함 사용하니까
         }
 
-        List<StudyCafeLockerPass> lockerPasses = studyCafeFileHandler.readLockerPasses();
-
-        StudyCafeLockerPass lockerPassCandidate = lockerPasses.stream()
-            .filter(option ->
-                option.getPassType() == selectedPass.getPassType()
-                    && option.getDuration() == selectedPass.getDuration()
-            )
-            .findFirst()
-            .orElse(null);
+        StudyCafeLockerPass lockerPassCandidate = findLockerPassCandidateBy(selectedPass);
 
         if (lockerPassCandidate != null) {
             outputHandler.askLockerPass(lockerPassCandidate);
@@ -66,5 +75,17 @@ public class StudyCafePassMachine {
         }
 
         return null;
+    }
+
+    private StudyCafeLockerPass findLockerPassCandidateBy(StudyCafePass pass) {
+        List<StudyCafeLockerPass> allLockerPasses = studyCafeFileHandler.readLockerPasses();
+
+        return allLockerPasses.stream()
+            .filter(lockerPass ->
+                lockerPass.getPassType() == pass.getPassType()
+                    && lockerPass.getDuration() == pass.getDuration()
+            )
+            .findFirst()
+            .orElse(null);
     }
 }
