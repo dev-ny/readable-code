@@ -46,6 +46,7 @@ public class GameBoard {
         }
 
         openSurroundedCells2(cellPosition);
+//        openSurroundedCells(cellPosition);
         checkIfGameIsOver();
         return;
     }
@@ -216,22 +217,20 @@ public class GameBoard {
     }
 
     private void openSurroundedCells2(CellPosition cellPosition) {
-        // cellPosition 을 담는 stack 을 사용하겠다
+        // 쓰레드로 갖고 있는 Stack 영역을 Stack 자료구조로 사용하는 것이 아니고
+        // Cell Position 을 담는 Stack 을 만들어서 쓰겠다.
         Stack<CellPosition> stack = new Stack<>();
-        stack.push(cellPosition);
+        stack.push(cellPosition); // 처음 들어온 cellPosition 일단 열어
 
-        while(!stack.isEmpty()) {
+        while (!stack.isEmpty()) {
             openAndPushCellAt(stack);
         }
-
     }
 
     private void openAndPushCellAt(Stack<CellPosition> stack) {
-//        if (cellPosition.isRowIndexMoreThanOrEqual(getRowSize())
-//                || cellPosition.isColIndexMoreThanOrEqual(getColSize())) { // 얘도 바깥에서 BoardSize 보다 큰지는 확인했지만 재귀로 연산을 하기때문에 두어야 함.
-//            return;
-//        }
         CellPosition currentCellPosition = stack.pop();
+
+
         if (isOpenedCell(currentCellPosition)) {
             return;
         }
@@ -249,9 +248,14 @@ public class GameBoard {
             return;
         }
 
-        List<CellPosition> surroundedPositions = calculateSurroundedPositions(currentCellPosition, getRowSize(), getColSize()); // 다음 레벨에 있는 node
-        for (CellPosition cellPosition : surroundedPositions) {
-            stack.push(cellPosition);
+
+        // 기존 재귀함수
+//        calculateSurroundedPositions(currentCellPosition, getRowSize(), getColSize())
+//                .forEach(this::openSurroundedCells);
+
+        List<CellPosition> surroundedPositions = calculateSurroundedPositions(currentCellPosition, getRowSize(), getColSize());
+        for (CellPosition surroundedPosition: surroundedPositions) {
+            stack.push(surroundedPosition);
         }
     }
 
