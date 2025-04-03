@@ -6,6 +6,8 @@ import cleancode.minesweeper.tobe.minesweeper.board.position.CellPositions;
 import cleancode.minesweeper.tobe.minesweeper.board.position.RelativePosition;
 import cleancode.minesweeper.tobe.minesweeper.board.cell.*;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 import java.util.Stack;
 
@@ -31,7 +33,7 @@ public class GameBoard {
 
         initializeEmptyCells(cellPositions);
 
-        List<CellPosition> landMinePositions =  cellPositions.extractRandomPositions(landMineCount);
+        List<CellPosition> landMinePositions = cellPositions.extractRandomPositions(landMineCount);
         initializeLandMineCells(landMinePositions);
 
         List<CellPosition> numberPositionCandidates = cellPositions.subtract(landMinePositions); // 너가 가진 거에서 파라미터가 주어진 것을 뺀 나머지 position 을 줘
@@ -64,8 +66,9 @@ public class GameBoard {
         int colSize = getColSize();
 
         return cellPosition.isRowIndexMoreThanOrEqual(rowSize)
-                || cellPosition.isColIndexMoreThanOrEqual(colSize);
+            || cellPosition.isColIndexMoreThanOrEqual(colSize);
     }
+
     public boolean isInProgress() {
         return gameStatus == GameStatus.IN_PROGRESS;
     }
@@ -99,13 +102,13 @@ public class GameBoard {
 
     private void initializeEmptyCells(CellPositions cellPositions) {
         List<CellPosition> allPositions = cellPositions.getPositions();
-        for (CellPosition position: allPositions) {
+        for (CellPosition position : allPositions) {
             updateCellAt(position, new EmptyCell());
         }
     }
 
     private void initializeLandMineCells(List<CellPosition> landMinePositions) {
-        for (CellPosition position: landMinePositions) {
+        for (CellPosition position : landMinePositions) {
             updateCellAt(position, new LandMineCell());
         }
     }
@@ -124,8 +127,8 @@ public class GameBoard {
         int colSize = getColSize();
 
         long count = calculateSurroundedPositions(cellPosition, rowSize, colSize).stream()
-                .filter(this::isLandMineCellAt) // 이거 지뢰Cell 이야?
-                .count();
+            .filter(this::isLandMineCellAt) // 이거 지뢰Cell 이야?
+            .count();
 
         return (int) count;
 
@@ -156,13 +159,14 @@ public class GameBoard {
 //        }
 //        return count;
     }
+
     private List<CellPosition> calculateSurroundedPositions(CellPosition cellPosition, int rowSize, int colSize) {
         return RelativePosition.SURROUNDED_POSITION.stream()
-                .filter(relativePosition -> cellPosition.canCalculatePositionBy(relativePosition)) // relativePosition 이 계산 가능한 Position 이야? 0 이상이야?
-                .map(relativePosition -> cellPosition.calculatePositionBy(relativePosition)) // 그러면 relativePosition 으로 새로운 좌표 계산해!
-                .filter(position -> position.isRowIndexLessThan(rowSize)) // 근데 이거 boardSize 이상이야?
-                .filter(position -> position.isColIndexLessThan(colSize))
-                .toList();
+            .filter(relativePosition -> cellPosition.canCalculatePositionBy(relativePosition)) // relativePosition 이 계산 가능한 Position 이야? 0 이상이야?
+            .map(relativePosition -> cellPosition.calculatePositionBy(relativePosition)) // 그러면 relativePosition 으로 새로운 좌표 계산해!
+            .filter(position -> position.isRowIndexLessThan(rowSize)) // 근데 이거 boardSize 이상이야?
+            .filter(position -> position.isColIndexLessThan(colSize))
+            .toList();
     }
 
     private void updateCellAt(CellPosition position, Cell cell) {
@@ -176,7 +180,7 @@ public class GameBoard {
 
     private void openSurroundedCells(CellPosition cellPosition) {
         if (cellPosition.isRowIndexMoreThanOrEqual(getRowSize())
-                || cellPosition.isColIndexMoreThanOrEqual(getColSize())) { // 얘도 바깥에서 BoardSize 보다 큰지는 확인했지만 재귀로 연산을 하기때문에 두어야 함.
+            || cellPosition.isColIndexMoreThanOrEqual(getColSize())) { // 얘도 바깥에서 BoardSize 보다 큰지는 확인했지만 재귀로 연산을 하기때문에 두어야 함.
             return;
         }
 
@@ -198,7 +202,7 @@ public class GameBoard {
         }
 
         calculateSurroundedPositions(cellPosition, getRowSize(), getColSize())
-                .forEach(this::openSurroundedCells);
+            .forEach(this::openSurroundedCells);
 //        ==
 //        RelativePosition.SURROUNDED_POSITION.stream()
 //                .filter(relativePosition -> cellPosition.canCalculatePositionBy(relativePosition)) // if 는 filter // cellPosition 이 canCalculate 한지
@@ -219,16 +223,22 @@ public class GameBoard {
     private void openSurroundedCells2(CellPosition cellPosition) {
         // 쓰레드로 갖고 있는 Stack 영역을 Stack 자료구조로 사용하는 것이 아니고
         // Cell Position 을 담는 Stack 을 만들어서 쓰겠다.
-        Stack<CellPosition> stack = new Stack<>();
-        stack.push(cellPosition); // 처음 들어온 cellPosition 일단 열어
+//        Stack<CellPosition> stack = new Stack<>();
+//        stack.push(cellPosition); // 처음 들어온 cellPosition 일단 열어
+//        while (!stack.isEmpty()) {
+//            openAndPushCellAt(stack);
+//        }
 
-        while (!stack.isEmpty()) {
-            openAndPushCellAt(stack);
+        Deque<CellPosition> deque = new ArrayDeque<>();
+        deque.push(cellPosition);
+
+        while (!deque.isEmpty()) {
+            openAndPushCellAt(deque);
         }
     }
 
-    private void openAndPushCellAt(Stack<CellPosition> stack) {
-        CellPosition currentCellPosition = stack.pop();
+    private void openAndPushCellAt(Deque<CellPosition> deque) {
+        CellPosition currentCellPosition = deque.pop();
 
 
         if (isOpenedCell(currentCellPosition)) {
@@ -254,8 +264,8 @@ public class GameBoard {
 //                .forEach(this::openSurroundedCells);
 
         List<CellPosition> surroundedPositions = calculateSurroundedPositions(currentCellPosition, getRowSize(), getColSize());
-        for (CellPosition surroundedPosition: surroundedPositions) {
-            stack.push(surroundedPosition);
+        for (CellPosition surroundedPosition : surroundedPositions) {
+            deque.push(surroundedPosition);
         }
     }
 
